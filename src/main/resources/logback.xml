@@ -1,0 +1,40 @@
+<configuration>
+
+    <property name="LOG_DIR" value="logs/" />
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+        <encoder>
+            <pattern>%date{HH:mm:ss} %-5level [%thread] %logger{0} %class#%method - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/${log-file:-photomigrationtools.log}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- daily rollover -->
+            <fileNamePattern>${LOG_DIR}/${log-file:-akka-hand-son-hchallenge.%d{yyyy-MM-dd}.%i.log.gz}</fileNamePattern>
+            <!--
+                Every minute - For Test
+                <fileNamePattern>${LOG_DIR}/${log-file:-photo-api.%d{yyyy-MM-dd_HH-mm, UTC}.log}</fileNamePattern>
+            -->
+            <maxFileSize>10MB</maxFileSize>
+            <!-- keep 3 days' worth of history -->
+            <maxHistory>3</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date{HH:mm:ss} %-5level [%thread] %logger{0} %class#%method - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.photobox.photomanagement" level="debug"/>
+
+
+    <root level="debug">
+        <appender-ref ref="console"/>
+        <appender-ref ref="file"/>
+    </root>
+
+</configuration>

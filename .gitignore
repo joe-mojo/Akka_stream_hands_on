@@ -1,0 +1,15 @@
+*.class
+*.log
+logs/
+.idea/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+.cache
+
+build/
+target/
+**/target/
