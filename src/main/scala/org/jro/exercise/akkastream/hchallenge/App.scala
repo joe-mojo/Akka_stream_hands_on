@@ -22,12 +22,8 @@ object App extends App {
       implicit val iMat: ActorMaterializer = mat
       implicit val execCtxt: ExecutionContext = sys.dispatcher
       val challenge = new HChallenge(0 to 99999999, Utils.hexStringToBytes("dae1d529b16ad4af420f4fd54840a0e4"))
-      //TODO 1.4, 2.3, 3.6: call HChallengeBuilder.run... depending on what stream you wnat to run.
-      //1.4:
       //HChallengeBuilder.runSimpleScan(challenge).onComplete(completion(LocalDateTime.now()))
-      //2.3:
       //HChallengeBuilder.runSimpleScanWithGraph(challenge).onComplete(completion(LocalDateTime.now()))
-      //3.6:
       HChallengeBuilder.runParallelScanWithGraph(
         challenge,
         args.headOption.map(Integer.parseInt).getOrElse(1)
@@ -52,7 +48,7 @@ object App extends App {
 
   def completion(startTime: LocalDateTime)(done: Try[_])(implicit sys: ActorSystem) = done match {
     case Success(_) =>
-      appLogger.info(s"Stream complete, terminating actor system. Stream successful. ${formatDuration(duration(startTime, LocalDateTime.now))}")
+      appLogger.info(s"Stream completed successfully, terminating actor system. ${formatDuration(duration(startTime, LocalDateTime.now))}")
       sys.terminate().onComplete(logTermination)(sys.dispatcher)
     case Failure(err) =>
       appLogger.error(s"Stream complete, terminating actor system. ${formatDuration(duration(startTime, LocalDateTime.now))}. Stream terminated with error:", err)
