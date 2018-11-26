@@ -35,10 +35,11 @@ object HChallengeBuilder {
   }
 
   def createSimpleScanGraph[Mat1, Mat2](source: Source[(String, Array[Byte]), Mat1], sink: Sink[(String, Array[Byte]), Mat2]): Graph[ClosedShape.type, Mat2] = {
-    /* TODO 2.1: create a simple  with GraphDSL that do exactly the same as HChallenge.simpleScan completed at 1.1
-       Hint: you need only to connect the source and the sink
-     */
-    ???
+    import GraphDSL.Implicits._
+    GraphDSL.create(sink) { implicit builder: GraphDSL.Builder[Mat2] => graphSink =>
+      source ~> graphSink
+      ClosedShape
+    }
   }
 
   def createParallelScanGraph[Mat2](challenge: HChallenge, par: Int, sink: Sink[(String, Array[Byte]), Mat2]) = {
@@ -51,8 +52,7 @@ object HChallengeBuilder {
   }
 
   def runSimpleScanWithGraph(challenge: HChallenge)(implicit matzr: Materializer): Future[Done] = {
-    //TODO 2.2: create a source, a sink and pass them to createSimpleScanGraph in order to create the graph, then run it
-    ???
+    RunnableGraph.fromGraph(createSimpleScanGraph(challenge.simpleScan, createProgressSink(challenge))).run()
   }
 
   def runParallelScanWithGraph(challenge: HChallenge, par: Int)(implicit matzr: Materializer): Future[Done] = {
