@@ -15,6 +15,23 @@ case class HChallenge(inputRange: Range, targetHash: Array[Byte]) {
     Source(inputRange).map(wrap).map(hashEntry).takeWhile(wrongHash(targetHash), inclusive = true)
   }
 
+  def cutIn(parts: Int): Seq[HChallenge] = {
+    val maxParts = Math.min(parts, inputRange.size)
+    val partSize = inputRange.size / maxParts
+    val remainingSize = inputRange.size % maxParts
+    @tailrec
+    def splitRange(rangeTail: Range, remainder: Int, result: List[Range]): List[Range] = {
+      if(rangeTail.size > partSize) {
+        val bonus = if(remainder > 0) 1 else 0
+        val ranges = rangeTail.splitAt(partSize + bonus)
+        splitRange(ranges._2, remainder - bonus, result :+ ranges._1)
+      } else {
+        result :+ rangeTail
+      }
+    }
+    splitRange(inputRange, remainingSize,  List.empty[Range]).map(r => copy(inputRange = r))
+  }
+
 }
 
 object HChallenge {
@@ -43,8 +60,11 @@ object HChallengeBuilder {
   }
 
   def createParallelScanGraph[Mat2](challenge: HChallenge, par: Int, sink: Sink[(String, Array[Byte]), Mat2]) = {
-    //TODO 3.4: create a graph with a source, parallel flows, and a sink. Don't forget that "par" argument is the number of parallel flows. Don't forget it must stop when the tarhet hash is found.
-    ???
+    import GraphDSL.Implicits._
+    GraphDSL.create(sink) { implicit builder: GraphDSL.Builder[Mat2] => graphSink =>
+      GraphElements.source(challenge.inputRange) ~> GraphElements.parallelHashFlow(par).takeWhile(wrongHash(challenge.targetHash), inclusive = true) ~> graphSink
+      ClosedShape
+    }
   }
 
   def runSimpleScan(challenge: HChallenge)(implicit matzr: Materializer): Future[Done] = {
@@ -56,35 +76,30 @@ object HChallengeBuilder {
   }
 
   def runParallelScanWithGraph(challenge: HChallenge, par: Int)(implicit matzr: Materializer): Future[Done] = {
-    //TODO 3.5: create graph with the requested level of parallelism and tun it with the "progress sink"
-    ???
+    RunnableGraph.fromGraph(createParallelScanGraph(challenge, par, createProgressSink(challenge))).run()
   }
 
   def runParallelScanWithGraph(challenge: HChallenge, par: Int, sink: Sink[(String, Array[Byte]), Future[Done]])(implicit matzr: Materializer): Future[Done] = {
-    //TODO 3.5 (Optional): create graph with the requested level of parallelism and tun it with the specified sink
-    ???
+    RunnableGraph.fromGraph(createParallelScanGraph(challenge, par, sink)).run()
   }
 
 
   object GraphElements {
     import HChallenge.hashEntry
 
-    def hashFlow: Flow[Int, (String, Array[Byte]), NotUsed] = {
-        //TODO 3.1: create a flow that take an Int as input and ouputs (String, Array[Byte]) where the string is the hash input and the Array is the hash value.
-        ???
-    }
+    def hashFlow: Flow[Int, (String, Array[Byte]), NotUsed] = Flow.fromFunction(wrap _ andThen hashEntry)
 
-    def source(range: Range): Source[Int, NotUsed] = ??? //TODO 3.2 create a source of numbers. DEAD simple, don't look for something complicated ;)
+    def source(range: Range): Source[Int, NotUsed] = Source(range)
 
-    def parallelHashFlow(parts: Int): Flow[Int, (String, Array[Byte]), NotUsed] = {
-      /* TODO 3.3 Create an open graph that connect the parallel flows :
-          - create balance using as much outputs as specified by "parts" argument
-          - create a merge using as much inputs as balance outputs
-          - connect balance, flow and merge. Don't forget that this must be done as much time as...
-          - return the right shape (not a closed shape)
-       */
-      ???
-    }
+    def parallelHashFlow(parts: Int): Flow[Int, (String, Array[Byte]), NotUsed] = Flow.fromGraph(GraphDSL.create() { implicit builder ⇒
+      import GraphDSL.Implicits._
+      val dispatIntegers = builder.add(Balance[Int](parts, waitForAllDownstreams = false))
+      val mergeHashEntries = builder.add(Merge[(String, Array[Byte])](parts))
+      for(p <- 0 until parts ) {
+        dispatIntegers.out(p) ~> hashFlow.async ~> mergeHashEntries.in(p)
+      }
+      FlowShape(dispatIntegers.in, mergeHashEntries.out)
+    })
 
   }
 }

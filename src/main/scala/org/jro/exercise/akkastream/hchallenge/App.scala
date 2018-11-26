@@ -26,7 +26,12 @@ object App extends App {
       //1.4:
       //HChallengeBuilder.runSimpleScan(challenge).onComplete(completion(LocalDateTime.now()))
       //2.3:
-      HChallengeBuilder.runSimpleScanWithGraph(challenge).onComplete(completion(LocalDateTime.now()))
+      //HChallengeBuilder.runSimpleScanWithGraph(challenge).onComplete(completion(LocalDateTime.now()))
+      //3.6:
+      HChallengeBuilder.runParallelScanWithGraph(
+        challenge,
+        args.headOption.map(Integer.parseInt).getOrElse(1)
+      ).onComplete(completion(LocalDateTime.now()))
 
       Success(sys, mat)
     case (sys, Failure(err)) =>
