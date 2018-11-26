@@ -22,7 +22,9 @@ object App extends App {
       implicit val iMat: ActorMaterializer = mat
       implicit val execCtxt: ExecutionContext = sys.dispatcher
       val challenge = new HChallenge(0 to 99999999, Utils.hexStringToBytes("dae1d529b16ad4af420f4fd54840a0e4"))
-      //TODO 1.4, 2.3, 3.6: call HChallengeBuilder.run... depending on what stream you want to run.
+      //TODO 1.4, 2.3, 3.6: call HChallengeBuilder.run... depending on what stream you wnat to run.
+      //1.4:
+      HChallengeBuilder.runSimpleScan(challenge).onComplete(completion(LocalDateTime.now()))
 
       Success(sys, mat)
     case (sys, Failure(err)) =>
@@ -43,10 +45,10 @@ object App extends App {
 
   def completion(startTime: LocalDateTime)(done: Try[_])(implicit sys: ActorSystem) = done match {
     case Success(_) =>
-      appLogger.info(s"Stream complete, terminating actor system. Stream successful. ${formatDuration(duration(startTime, LocalDateTime.now))}")
+      appLogger.info(s"Stream complete, terminating actor system. Stream successful. ${fromatDuration(duration(startTime, LocalDateTime.now))}")
       sys.terminate().onComplete(logTermination)(sys.dispatcher)
     case Failure(err) =>
-      appLogger.error(s"Stream complete, terminating actor system. ${formatDuration(duration(startTime, LocalDateTime.now))}. Stream terminated with error:", err)
+      appLogger.error(s"Stream complete, terminating actor system. ${fromatDuration(duration(startTime, LocalDateTime.now))}. Stream terminated with error:", err)
       sys.terminate().onComplete(logTermination)(sys.dispatcher)
   }
 
@@ -67,7 +69,7 @@ object App extends App {
     (hours, minutes, seconds, ms)
   }
 
-  def formatDuration(duration: (Long, Long, Long, Long)) = {
+  def fromatDuration(duration: (Long, Long, Long, Long)) = {
     val (hours, minutes, seconds, ms) = duration
     s"Elapsed: ${hours}h ${minutes}min ${seconds}.${ms}s"
   }

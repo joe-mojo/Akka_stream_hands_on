@@ -12,10 +12,7 @@ import scala.concurrent.Future
 case class HChallenge(inputRange: Range, targetHash: Array[Byte]) {
   import HChallenge.{wrongHash, hashEntry}
   def simpleScan: Source[(String, Array[Byte]), NotUsed] = {
-    /* TODO 1.1 create a source of Int mapped to (String, Array[Byte]) where the string is the hash input and the Array is the hash value. Don't forget it must stop when the tarhet hash is found.
-       Hint : use function in Utils._
-     */
-    ???
+    Source(inputRange).map(wrap).map(hashEntry).takeWhile(wrongHash(targetHash), inclusive = true)
   }
 
 }
@@ -28,14 +25,13 @@ object HChallenge {
 
 
 object HChallengeBuilder {
-  def createProgressSink(challenge: HChallenge): Sink[(String, Array[Byte]), Future[Done]] = {
-    //TODO 1.2: create a sink to display progress and result
-    ???
+  def createProgressSink(challenge: HChallenge): Sink[(String, Array[Byte]), Future[Done]] = Sink.foreach{ (hashEntry: (String, Array[Byte])) =>
+    if(rightHash(challenge.targetHash)(hashEntry)) println(s"\r${Console.GREEN} * FOUND * ${Console.CYAN}${hashEntry._1}${Console.RESET} --> ${Console.CYAN}${bytesToHexString(hashEntry._2)}${Console.RESET}")
+    else if(hashEntry._1.endsWith("00000]")) print(s"\r${Console.YELLOW}current progress: ${Console.BLUE}${hashEntry._1}${Console.RESET} --> ${Console.BLUE}${bytesToHexString(hashEntry._2)}${Console.RESET}")
   }
 
-  def createQuietSink(challenge: HChallenge): Sink[(String, Array[Byte]), Future[Done]] = {
-    //TODO 1.2 (optional): create a sink to display result only
-    ???
+  def createQuietSink(challenge: HChallenge): Sink[(String, Array[Byte]), Future[Done]] = Sink.foreach{ (hashEntry: (String, Array[Byte])) =>
+    if(rightHash(challenge.targetHash)(hashEntry)) println(s"\r${Console.GREEN} * FOUND * ${Console.CYAN}${hashEntry._1}${Console.RESET} --> ${Console.CYAN}${bytesToHexString(hashEntry._2)}${Console.RESET}")
   }
 
   def createSimpleScanGraph[Mat1, Mat2](source: Source[(String, Array[Byte]), Mat1], sink: Sink[(String, Array[Byte]), Mat2]): Graph[ClosedShape.type, Mat2] = {
@@ -51,8 +47,7 @@ object HChallengeBuilder {
   }
 
   def runSimpleScan(challenge: HChallenge)(implicit matzr: Materializer): Future[Done] = {
-    //TODO 1.3: create a simple scan and run it using the sinke created at 1.2
-    ???
+    challenge.simpleScan.runWith(createProgressSink(challenge))
   }
 
   def runSimpleScanWithGraph(challenge: HChallenge)(implicit matzr: Materializer): Future[Done] = {
