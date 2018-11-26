@@ -5,7 +5,7 @@ lazy val root = (project in file(".")).
   settings(
     inThisBuild(List(
       organization := "com.photobox.photomanagement",
-      scalaVersion := "2.12.4",
+      scalaVersion := "2.12.7",
       version      := "0.1.0-SNAPSHOT"
     )),
     name := "Akka_Stream_hands_on",
