@@ -25,7 +25,7 @@ Create a source of numbers, map it to a (number, hash) tuple, and add a sink to 
 The flow must stop on first matching hash. 
  - Connect a sink the output of the flow to see progress (optional) and result.
 
-![Simple flow](doc/Simple%20flow%20graph.png)
+![Simple flow](doc/simple%20flow%20graph.png)
 
 ## Graph with parallelized flows using GraphDSL
 
