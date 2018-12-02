@@ -12,4 +12,12 @@ object Utils {
   def md5sum(input: String): Array[Byte] = MessageDigest.getInstance("MD5").digest(input.getBytes(StandardCharsets.US_ASCII))
   def wrap(number: Int): String = s"[${number.toString.reverse.padTo(8, '0').reverse}]"
 
+  object MessageBuilder {
+    def txtFound(hashEntry: (String, Array[Byte]), line: Int = 1): String = {
+      s"\u001B[s\u001B[${line};1H${line}) ${Console.GREEN} * FOUND * ${Console.CYAN}${hashEntry._1}${Console.RESET} --> ${Console.CYAN}${bytesToHexString(hashEntry._2)}${Console.RESET}\u001B[u"
+    }
+    def progress(hashEntry: (String, Array[Byte]), line: Int = 1): String = {
+      s"\u001B[s\u001B[${line};1H${line}) ${Console.YELLOW}current progress: ${Console.BLUE}${hashEntry._1}${Console.RESET} --> ${Console.BLUE}${bytesToHexString(hashEntry._2)}${Console.RESET}\u001B[u"
+    }
+  }
 }

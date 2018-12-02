@@ -7,7 +7,7 @@ import akka.stream._
 import HChallenge.{rightHash, wrongHash}
 
 import scala.annotation.tailrec
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 case class HChallenge(inputRange: Range, targetHash: Array[Byte]) {
   import HChallenge.{wrongHash, hashEntry}
@@ -42,13 +42,21 @@ object HChallenge {
 
 
 object HChallengeBuilder {
-  def createProgressSink(challenge: HChallenge): Sink[(String, Array[Byte]), Future[Done]] = Sink.foreach{ (hashEntry: (String, Array[Byte])) =>
-    if(rightHash(challenge.targetHash)(hashEntry)) println(s"\r${Console.GREEN} * FOUND * ${Console.CYAN}${hashEntry._1}${Console.RESET} --> ${Console.CYAN}${bytesToHexString(hashEntry._2)}${Console.RESET}")
-    else if(hashEntry._1.endsWith("00000]")) print(s"\r${Console.YELLOW}current progress: ${Console.BLUE}${hashEntry._1}${Console.RESET} --> ${Console.BLUE}${bytesToHexString(hashEntry._2)}${Console.RESET}")
+  def createProgressSink(challenge: HChallenge, line: Int = 1): Sink[(String, Array[Byte]), Future[Done]] = Sink.foreach{ hashEntry: (String, Array[Byte]) =>
+    if(rightHash(challenge.targetHash)(hashEntry)) println(s"\r${MessageBuilder.txtFound(hashEntry, line)}")
+    else if(hashEntry._1.endsWith("00000]")) print(s"\r${MessageBuilder.progress(hashEntry, line)}")
   }
 
-  def createQuietSink(challenge: HChallenge): Sink[(String, Array[Byte]), Future[Done]] = Sink.foreach{ (hashEntry: (String, Array[Byte])) =>
-    if(rightHash(challenge.targetHash)(hashEntry)) println(s"\r${Console.GREEN} * FOUND * ${Console.CYAN}${hashEntry._1}${Console.RESET} --> ${Console.CYAN}${bytesToHexString(hashEntry._2)}${Console.RESET}")
+  def createKillingProgressSink(challenge: HChallenge, line: Int = 1, redButton: SharedKillSwitch): Sink[(String, Array[Byte]), Future[Done]] = Sink.foreach{ hashEntry: (String, Array[Byte]) =>
+    if(rightHash(challenge.targetHash)(hashEntry)){
+      println(s"\r${MessageBuilder.txtFound(hashEntry, line)}")
+      redButton.shutdown()
+    }
+    else if(hashEntry._1.endsWith("00000]")) print(s"\r${MessageBuilder.progress(hashEntry, line)}")
+  }
+
+  def createQuietSink(challenge: HChallenge): Sink[(String, Array[Byte]), Future[Done]] = Sink.foreach{ hashEntry: (String, Array[Byte]) =>
+    if(rightHash(challenge.targetHash)(hashEntry)) println(s"\r${MessageBuilder.txtFound(hashEntry)}")
   }
 
   def createSimpleScanGraph[Mat1, Mat2](source: Source[(String, Array[Byte]), Mat1], sink: Sink[(String, Array[Byte]), Mat2]): Graph[ClosedShape.type, Mat2] = {
@@ -67,6 +75,34 @@ object HChallengeBuilder {
     }
   }
 
+  def combiner(
+          sink1: Future[Done],
+          sink2: Future[Done],
+          sink3: Future[Done]
+  ) = {
+    implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+    Future.sequence(Seq(sink1, sink2, sink3)).map(seq => seq.foldLeft(Done)((_, _) => Done))
+  }
+
+  def createMultiSinkParallelScanGraph(challenge: HChallenge, par: Int) = {
+    import GraphDSL.Implicits._
+    val redButton = KillSwitches.shared("red-button")
+    GraphDSL.create(
+      createKillingProgressSink(challenge, 1, redButton),
+      createKillingProgressSink(challenge, 2, redButton),
+      createKillingProgressSink(challenge, 3, redButton))(combiner) { implicit builder: GraphDSL.Builder[Future[Done]] =>
+        (sink1, sink2, sink3) =>
+          val src = GraphElements.source(challenge.inputRange)
+          val dispatchIntegers = builder.add(Balance[Int](3))
+          src ~> dispatchIntegers
+          List(sink1, sink2, sink3).map(_.in).zip(dispatchIntegers.outlets).foreach { inOut =>
+            val (sinkIn, dispatchOut) = inOut
+            dispatchOut ~> GraphElements.hashFlow.async.takeWhile(wrongHash(challenge.targetHash), inclusive = true) ~> redButton.flow[(String, Array[Byte])] ~> sinkIn
+          }
+          ClosedShape
+      }
+  }
+
   def runSimpleScan(challenge: HChallenge)(implicit matzr: Materializer): Future[Done] = {
     challenge.simpleScan.runWith(createProgressSink(challenge))
   }
@@ -81,6 +117,10 @@ object HChallengeBuilder {
 
   def runParallelScanWithGraph(challenge: HChallenge, par: Int, sink: Sink[(String, Array[Byte]), Future[Done]])(implicit matzr: Materializer): Future[Done] = {
     RunnableGraph.fromGraph(createParallelScanGraph(challenge, par, sink)).run()
+  }
+
+  def runParallelMultiSinkScanWithGraph(challenge: HChallenge, par: Int)(implicit matzr: Materializer): Future[Done] = {
+    RunnableGraph.fromGraph(createMultiSinkParallelScanGraph(challenge, par)).run()
   }
 
 

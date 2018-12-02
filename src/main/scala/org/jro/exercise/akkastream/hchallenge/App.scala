@@ -22,9 +22,11 @@ object App extends App {
       implicit val iMat: ActorMaterializer = mat
       implicit val execCtxt: ExecutionContext = sys.dispatcher
       val challenge = new HChallenge(0 to 99999999, Utils.hexStringToBytes("dae1d529b16ad4af420f4fd54840a0e4"))
-      //HChallengeBuilder.runSimpleScan(challenge).onComplete(completion(LocalDateTime.now()))
-      //HChallengeBuilder.runSimpleScanWithGraph(challenge).onComplete(completion(LocalDateTime.now()))
-      HChallengeBuilder.runParallelScanWithGraph(
+//      val challenge = new HChallenge(0 to 99999999, Utils.hexStringToBytes("e86820b69ce06c5e5e8fc11bd8d7f04e"))
+//      HChallengeBuilder.runSimpleScan(challenge).onComplete(completion(LocalDateTime.now()))
+//      HChallengeBuilder.runSimpleScanWithGraph(challenge).onComplete(completion(LocalDateTime.now()))
+//      HChallengeBuilder.runParallelScanWithGraph(
+      HChallengeBuilder.runParallelMultiSinkScanWithGraph(
         challenge,
         args.headOption.map(Integer.parseInt).getOrElse(1)
       ).onComplete(completion(LocalDateTime.now()))
