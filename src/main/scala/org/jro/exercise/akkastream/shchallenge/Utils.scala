@@ -1,4 +1,4 @@
-package org.jro.exercise.akkastream.hchallenge
+package org.jro.exercise.akkastream.shchallenge
 
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
