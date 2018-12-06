@@ -1,4 +1,4 @@
-package org.jro.exercise.akkastream.hchallenge
+package org.jro.exercise.akkastream.shchallenge
 
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
