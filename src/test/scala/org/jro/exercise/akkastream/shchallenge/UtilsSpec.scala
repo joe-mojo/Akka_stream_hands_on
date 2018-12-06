@@ -1,6 +1,7 @@
-package org.jro.exercise.akkastream.hchallenge
+package org.jro.exercise.akkastream.shchallenge
 
 import akka.util.ByteString
+import org.jro.exercise.akkastream.shchallenge.Utils
 import org.scalatest.{Matchers, WordSpec}
 
 class UtilsSpec extends WordSpec with Matchers {

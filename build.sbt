@@ -10,8 +10,9 @@ lazy val root = (project in file(".")).
     )),
     name := "Akka_Stream_hands_on",
     test in assembly := {},
-    mainClass in Compile := Some("org.jro.exercise.akkastream.hchallenge.App"),
-    assemblyJarName in assembly := s"akka-stream-hands-on-hchallenge-${version.value}.jar",
+    mainClass in Compile := Some("App"),
+    assemblyJarName in assembly := s"akka-stream-hands-on-hchallenge-${version.value}.jar", 
+    compileOrder := CompileOrder.ScalaThenJava,
     libraryDependencies ++= Seq(
       scalaTest % Test,
       akkaStream,
