@@ -1,7 +1,8 @@
-package org.jro.exercise.akkastream.hchallenge
+package org.jro.exercise.akkastream.shchallenge
 
 import org.scalatest._
 import Matchers._
+import org.jro.exercise.akkastream.shchallenge.{HChallenge, Utils}
 
 class HChallengeSpec extends WordSpec with Matchers with Inside{
   val targetHashAsArray: Array[Byte] = Array(-38, -31, -43, 41, -79, 106, -44, -81, 66, 15, 79, -43, 72, 64, -96, -28)

@@ -1,4 +1,4 @@
-package org.jro.exercise.akkastream.hchallenge
+package org.jro.exercise.akkastream.shchallenge
 
 import akka.stream.scaladsl.{Balance, Flow, GraphDSL, Merge, RunnableGraph, Sink, Source}
 import Utils.{md5sum, _}
