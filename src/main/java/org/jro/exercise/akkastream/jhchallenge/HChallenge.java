@@ -20,7 +20,11 @@ public class HChallenge {
 	}
 
 	public Source<Tuple2<String, byte[]>, NotUsed> simpleScan() {
-		return Source.range(minInput, maxInput).map(Utils::wrap).map(HChallenge::hashEntry).takeWhile(this::wrongHash, true);
+		/* TODO 1.1 create a source of Int mapped to (String, Array[Byte]) where the string is the hash input and the Array is the hash value. Don't forget it must stop when the target hash is found.
+		   Sorry, in Java a (String, Array[Byte]) is a Tuple2<String, byte[]> :/
+		   Hint : use function in Utils
+		*/
+		return null;
 	}
 
 	public static Tuple2<String, byte[]> hashEntry(String input) {

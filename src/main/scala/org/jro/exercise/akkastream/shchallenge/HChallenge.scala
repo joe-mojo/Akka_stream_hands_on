@@ -46,7 +46,7 @@ object HChallengeBuilder {
   }
 
   def createParallelScanGraph[Mat2](challenge: HChallenge, par: Int, sink: Sink[(String, Array[Byte]), Mat2]) = {
-    //TODO 3.4: create a graph with a source, parallel flows, and a sink. Don't forget that "par" argument is the number of parallel flows. Don't forget it must stop when the tarhet hash is found.
+    //TODO 3.4: create a graph with a source, parallel flows, and a sink. Don't forget that "par" argument is the number of parallel flows. Don't forget it must stop when the target hash is found.
     ???
   }
 
