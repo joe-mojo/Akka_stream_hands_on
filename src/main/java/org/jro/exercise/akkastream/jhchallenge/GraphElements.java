@@ -19,7 +19,7 @@ public class GraphElements {
 
 	public static Flow<Integer, Tuple2<String, byte[]>, NotUsed> parallelHashFlow(int parts) {
 		return Flow.fromGraph(GraphDSL.create(builder -> {
-				final UniformFanOutShape<Integer, Integer> dispatchIntegers = builder.add(Broadcast.create(parts));
+				final UniformFanOutShape<Integer, Integer> dispatchIntegers = builder.add(Balance.create(parts));
 				final UniformFanInShape<Tuple2<String, byte[]>, Tuple2<String, byte[]>> mergeHashEntries = builder.add(Merge.create(parts));
 				for(int p = 0; p < parts; p++) {
 					builder.from(dispatchIntegers).via(builder.add(hashFlow().async())).toFanIn(mergeHashEntries);
