@@ -86,21 +86,11 @@ object HChallengeBuilder {
 
   def createMultiSinkParallelScanGraph(challenge: HChallenge, par: Int) = {
     import GraphDSL.Implicits._
-    val redButton = KillSwitches.shared("red-button")
-    GraphDSL.create(
-      createKillingProgressSink(challenge, 1, redButton),
-      createKillingProgressSink(challenge, 2, redButton),
-      createKillingProgressSink(challenge, 3, redButton))(combiner) { implicit builder: GraphDSL.Builder[Future[Done]] =>
-        (sink1, sink2, sink3) =>
-          val src = GraphElements.source(challenge.inputRange)
-          val dispatchIntegers = builder.add(Balance[Int](3))
-          src ~> dispatchIntegers
-          List(sink1, sink2, sink3).map(_.in).zip(dispatchIntegers.outlets).foreach { inOut =>
-            val (sinkIn, dispatchOut) = inOut
-            dispatchOut ~> GraphElements.hashFlow.async.takeWhile(wrongHash(challenge.targetHash), inclusive = true) ~> redButton.flow[(String, Array[Byte])] ~> sinkIn
-          }
-          ClosedShape
-      }
+    /* TODO Create a kill switch, and use it to stop other flows when one find the right hash.
+       Create a source of Int, a Balance with 3 outputs, connect a flow , a kill switch and a sink to each output
+       There is a combiner for 3 sinks above.
+     */
+    ???
   }
 
   def runSimpleScan(challenge: HChallenge)(implicit matzr: Materializer): Future[Done] = {
