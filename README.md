@@ -42,5 +42,4 @@ The flow must stop on first matching hash.
  - Create a balancer that takes numbers as input and balance them into as much output as requested by a command line arg.
  - Create a flow that takes numbers as input and gives a tuple (number, hash) as output.
  - Connect balance to parallel flows and each flow to a sink
- - Insert a kill switch before each sink. The first flow to win push the red button. BOOM !
-
+ - Insert a kill switch before each sink. The first flow to win push the red button. BOOM ! (You can fix the number of parallel flows)
