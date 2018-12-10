@@ -37,3 +37,10 @@ The flow must stop on first matching hash.
 
 ![Parralel flows](doc/parrallel%20flows.png)
 
+## Bonus : Graph with parallelized flows and kill switches
+ - Create a source of numbers.
+ - Create a balancer that takes numbers as input and balance them into as much output as requested by a command line arg.
+ - Create a flow that takes numbers as input and gives a tuple (number, hash) as output.
+ - Connect balance to parallel flows and each flow to a sink
+ - Insert a kill switch before each sink. The first flow to win push the red button. BOOM !
+
