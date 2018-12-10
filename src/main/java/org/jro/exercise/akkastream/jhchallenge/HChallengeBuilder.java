@@ -70,20 +70,4 @@ public class HChallengeBuilder {
 		return RunnableGraph.fromGraph(createParallelScanGraph(challenge, par, createProgressSink(challenge))).run(matzr);
 	}
 
-	/*
-	def createParallelScanGraph[Mat2](challenge: HChallenge, par: Int, sink: Sink[(String, Array[Byte]), Mat2]) = {
-    import GraphDSL.Implicits._
-    GraphDSL.create(sink) { implicit builder: GraphDSL.Builder[Mat2] => graphSink =>
-      GraphElements.source(challenge.inputRange) ~> GraphElements.parallelHashFlow(par).takeWhile(wrongHash(challenge.targetHash), inclusive = true) ~> graphSink
-      ClosedShape
-    }
-  }
-
-  def runParallelScanWithGraph(challenge: HChallenge, par: Int)(implicit matzr: Materializer): Future[Done] = {
-    RunnableGraph.fromGraph(createParallelScanGraph(challenge, par, createProgressSink(challenge))).run()
-  }
-
-	 */
-
-
 }

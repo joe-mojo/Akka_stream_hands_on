@@ -26,8 +26,12 @@ public class Main {
 		try{
 			final Materializer materializer = ActorMaterializer.create(system);
 			HChallenge challenge = new HChallenge(0, 99999999, Utils.hexStringToBytes("dae1d529b16ad4af420f4fd54840a0e4"));
+			//TODO 1.4, 2.3, 3.6: call HChallengeBuilder.run... depending on what stream you want to run.
+			//1.4:
 			//HChallengeBuilder.runSimpleScan(challenge, materializer).whenComplete(completion(LocalDateTime.now(), system));
+			//2.3:
 			//HChallengeBuilder.runSimpleScanWithGraph(challenge, materializer).whenComplete(completion(LocalDateTime.now(), system));
+			//3.6:
 			HChallengeBuilder.runParallelScanWithGraph(challenge, parallelism, materializer).whenComplete(completion(LocalDateTime.now(), system));
 		} catch (Exception ex){
 			system.terminate().onComplete(triedTerminated -> {

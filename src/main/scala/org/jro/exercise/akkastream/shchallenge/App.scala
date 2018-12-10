@@ -22,7 +22,7 @@ object App extends App {
       implicit val iMat: ActorMaterializer = mat
       implicit val execCtxt: ExecutionContext = sys.dispatcher
       val challenge = new HChallenge(0 to 99999999, Utils.hexStringToBytes("dae1d529b16ad4af420f4fd54840a0e4"))
-      //TODO 1.4, 2.3, 3.6: call HChallengeBuilder.run... depending on what stream you wnat to run.
+      //TODO 1.4, 2.3, 3.6: call HChallengeBuilder.run... depending on what stream you want to run.
       //1.4:
       //HChallengeBuilder.runSimpleScan(challenge).onComplete(completion(LocalDateTime.now()))
       //2.3:
