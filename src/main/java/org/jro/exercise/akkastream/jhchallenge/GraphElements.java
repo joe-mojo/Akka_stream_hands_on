@@ -28,20 +28,4 @@ public class GraphElements {
 			})
 		);
 	}
-	/*
-	object GraphElements {
-    import HChallenge.hashEntry
-
-    def parallelHashFlow(parts: Int): Flow[Int, (String, Array[Byte]), NotUsed] = Flow.fromGraph(GraphDSL.create() { implicit builder ⇒
-      import GraphDSL.Implicits._
-      val dispatIntegers = builder.add(Balance[Int](parts, waitForAllDownstreams = false))
-      val mergeHashEntries = builder.add(Merge[(String, Array[Byte])](parts))
-      for(p <- 0 until parts ) {
-        dispatIntegers.out(p) ~> hashFlow.async ~> mergeHashEntries.in(p)
-      }
-      FlowShape(dispatIntegers.in, mergeHashEntries.out)
-    })
-
-  }
-	 */
 }

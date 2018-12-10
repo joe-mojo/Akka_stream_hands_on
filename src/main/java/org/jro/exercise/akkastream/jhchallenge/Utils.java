@@ -71,7 +71,4 @@ public class Utils {
 		int numberStrLen = numberStr.length();
 		return String.format("[%s]", "00000000".substring(0, 8 - numberStrLen) + numberStr);
 	}
-	/*
-	def wrap(number: Int): String = s"[${number.toString.reverse.padTo(8, '0').reverse}]"
-	 */
 }
