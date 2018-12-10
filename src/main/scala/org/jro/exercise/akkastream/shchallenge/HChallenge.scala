@@ -15,6 +15,22 @@ case class HChallenge(inputRange: Range, targetHash: Array[Byte]) {
     Source(inputRange).map(wrap).map(hashEntry).takeWhile(wrongHash(targetHash), inclusive = true)
   }
 
+  def cutIn(parts: Int): Seq[HChallenge] = {
+    val maxParts = Math.min(parts, inputRange.size)
+    val partSize = inputRange.size / maxParts
+    val remainingSize = inputRange.size % maxParts
+    @tailrec
+    def splitRange(rangeTail: Range, remainder: Int, result: List[Range]): List[Range] = {
+      if(rangeTail.size > partSize) {
+        val bonus = if(remainder > 0) 1 else 0
+        val ranges = rangeTail.splitAt(partSize + bonus)
+        splitRange(ranges._2, remainder - bonus, result :+ ranges._1)
+      } else {
+        result :+ rangeTail
+      }
+    }
+    splitRange(inputRange, remainingSize,  List.empty[Range]).map(r => copy(inputRange = r))
+  }
 }
 
 object HChallenge {
